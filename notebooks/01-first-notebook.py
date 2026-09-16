@@ -150,8 +150,9 @@ def _(freight_charges):
 
 @app.cell
 def _(freight_charges):
-    sum(freight_charges)
-    return
+    total = sum(freight_charges)
+    total
+    return (total,)
 
 
 @app.cell(hide_code=True)
@@ -347,6 +348,24 @@ def _(mo):
     return
 
 
+@app.cell
+def _(freight_charges):
+    freight_charges[0] > 20
+    return
+
+
+@app.cell
+def _(freight_charges):
+    freight_charges[-1] == max(freight_charges)
+    return
+
+
+@app.cell
+def _(freight_charges):
+    type(freight_charges[0] > 20)
+    return
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
@@ -382,6 +401,18 @@ def _(mo):
 
     Your sentence should show `$120.50` and `$24.10`. If it does not, the experiments above left something changed: check that `freight_charges` still starts with `16.75` and that your `total` cell is still there.
     """)
+    return
+
+
+@app.cell
+def _():
+    print ('i got it')
+    return
+
+
+@app.cell
+def _(freight_charges, total):
+    print(f"total freight was ${total:.2f} and the average charge was ${total/len(freight_charges):.2f}.")#
     return
 
 
@@ -435,6 +466,32 @@ def _(mo):
     return
 
 
+@app.cell
+def _(freight_charges):
+    under_25 = []
+    for c in freight_charges:
+        if c < 25:
+            under_25.append(c)
+    under_25
+    return (under_25,)
+
+
+@app.cell
+def _(under_25):
+    print(f"{len(under_25)} charges were below 25, adding up to ${sum(under_25):.2f}.")
+    return
+
+
+@app.cell
+def _(freight_charges):
+    under_25_v2 = []
+    for x in freight_charges:
+        if x <= 25:
+            under_25_v2.append(x)
+    under_25_v2
+    return
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
@@ -476,12 +533,64 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
+    This means Python looked for a package called pandsa and couldn't find one installed
+    """)
+    return
+
+
+@app.cell
+def _():
+    import pandsa
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    Python tried to open sales.csv, but no file with that name exists in this project, so it fails with a "no such file or directory" error.
+    """)
+    return
+
+
+@app.cell
+def _():
+    open ("sales.csv")
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    It opened a list with [ but never found the ] to close it, so it can't tell where the list ends and stops with a syntax error.
+    """)
+    return
+
+
+app._unparsable_cell(
+    r"""
+    new_charges = [16.75, 22.25,
+            
+    """,
+    name="_"
+)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
     # 🙋 A Line That Does Not Break
 
     Write down what this gives, then run it in a cell of your own.
 
     `max(["9.50", "16.75", "22.25"])`
     """)
+    return
+
+
+@app.cell
+def _():
+    max(["9.50", "16.75", "22.25"])
     return
 
 
@@ -496,6 +605,12 @@ def _(mo):
 
     📖 Handbook: Python §2 Types
     """)
+    return
+
+
+@app.cell
+def _():
+    max([9.50, 16.75, 22.25])
     return
 
 
@@ -528,6 +643,38 @@ def _(mo):
     2. Which line would you change, and why is it a different line from the one Python named?
     3. What would you change it to? More than one answer is defensible, so state the rule you chose.
     """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    which line does Python name? total = sum(freight_charges)
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    Which line would you change, and why is it a different line from the one Python named?
+    I would fix line 1 instead. That's the line with the bad data "pending" is text, not a number, and it's hiding inside a list of prices
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    What would you change it to? More than one answer is defensible, so state the rule you chose.
+    I would change "pending" to 0, since it's an order that hasn't shipped yet and has no charge.
+    My rule: every value in a list you plan to add up needs to be a number, not text.
+    """)
+    return
+
+
+@app.cell
+def _():
     return
 
 
