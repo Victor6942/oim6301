@@ -49,11 +49,20 @@ def _():
     return (mo,)
 
 
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    # Your First Notebook
-    """)
+@app.cell
+def _():
+    61239124812+2173123
+    return
+
+
+@app.cell
+def _():
+    print ('hellow world')
+    return
+
+
+@app.cell
+def _():
     return
 
 
@@ -96,8 +105,14 @@ def _(mo):
 @app.cell
 def _():
     freight_charges = [16.75, 22.25, 25.00, 20.25, 36.25]
-    freight_charges
+
     return (freight_charges,)
+
+
+@app.cell
+def _(freight_charges):
+    freight_charges
+    return
 
 
 @app.cell(hide_code=True)
@@ -118,6 +133,24 @@ def _(mo):
     *The number in brackets is an **index**, and Python counts from zero, so
     `freight_charges[0]` is the first one.*
     """)
+    return
+
+
+@app.cell
+def _(freight_charges):
+    freight_charges[2]
+    return
+
+
+@app.cell
+def _(freight_charges):
+    len(freight_charges)
+    return
+
+
+@app.cell
+def _(freight_charges):
+    sum(freight_charges)
     return
 
 
@@ -203,6 +236,40 @@ def _(mo):
     6. `orders * 2`, then `orders + freight_charges`. Neither one is an error.
     7. `sorted(freight_charges)`, then `sorted(freight_charges, reverse=True)`. What did `reverse=True` change, and did `freight_charges` itself change?
     """)
+    return
+
+
+@app.cell
+def _(freight_charges):
+    freight_charges [-1]
+    return
+
+
+@app.cell
+def _(freight_charges):
+    freight_charges[0]
+    return
+
+
+@app.cell
+def _(freight_charges):
+    freight_charges[:3]
+    return
+
+
+@app.cell
+def _(orders):
+    orders[0]
+    return
+
+
+@app.cell
+def _():
+    return
+
+
+@app.cell
+def _():
     return
 
 
