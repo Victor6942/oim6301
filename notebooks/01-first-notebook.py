@@ -105,7 +105,6 @@ def _(mo):
 @app.cell
 def _():
     freight_charges = [16.75, 22.25, 25.00, 20.25, 36.25]
-
     return (freight_charges,)
 
 
@@ -261,16 +260,6 @@ def _(freight_charges):
 @app.cell
 def _(orders):
     orders[0]
-    return
-
-
-@app.cell
-def _():
-    return
-
-
-@app.cell
-def _():
     return
 
 
@@ -570,7 +559,6 @@ def _(mo):
 app._unparsable_cell(
     r"""
     new_charges = [16.75, 22.25,
-            
     """,
     name="_"
 )
@@ -704,6 +692,18 @@ def _(mo):
 
     The square brackets inside `_ax.bar(...)` are a **list comprehension**, which **iterates** over `orders` and turns each number into text.
     """)
+    return
+
+
+@app.cell
+def _(freight_charges, orders):
+    import matplotlib.pyplot as plt
+
+    _fig, _ax = plt.subplots(figsize=(6, 2.6))
+    _ax.bar([str(_o) for _o in orders], freight_charges)
+    _ax.set_ylabel("freight")
+    _fig
+
     return
 
 
