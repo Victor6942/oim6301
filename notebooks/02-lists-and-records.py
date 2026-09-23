@@ -300,7 +300,7 @@ def _():
     if score >= 90:
         print('A')
     elif score >=80:
-        print ('B')
+        print ('')
     elif score >= 60:
         print('Pass')
     else: 
@@ -341,6 +341,37 @@ def _(mo):
 def _():
     statuses = ["shipped", "pending", "shipped", "cancelled", "shipped"]
     statuses
+    return (statuses,)
+
+
+@app.cell
+def _(statuses):
+    shipped_count = 0
+    for s in statuses:
+        #This starts a loop. It goes through the list statuses one item at a time. Each time through, the current item gets the temporary name status. So this line will run its body 5 times — once for each order. ex: we have 0 varibles
+        if s == "shipped":
+            #This is a condition, checked fresh each time through the loop. == asks "does this equal that?"
+            shipped_count = shipped_count + 1 
+            #This only runs when the condition above is True. It takes whatever shipped_count currently is, adds 1, and stores that back into shipped_count. This is the same running-total pattern you used with freight charges, just adding 1 each time instead of adding a charge.
+        
+    shipped_count
+    return (shipped_count,)
+
+
+@app.cell
+def _(statuses):
+    not_shipped_count = 0
+    for ns in statuses:
+            if ns != "shipped":
+                not_shipped_count = not_shipped_count + 1
+    not_shipped_count
+    return
+
+
+@app.cell
+def _(shipped_count, statuses):
+    percent_shipped = shipped_count /len(statuses) * 100
+    percent_shipped
     return
 
 
@@ -368,8 +399,24 @@ def _(mo):
 @app.cell
 def _():
     order_lines = ["notebook", "pen"]
-    order_lines.append(["stapler", "tape"])
+    order_lines.extend(["stapler", "tape"])
+    #.append():always adds exactly one new item to the end of a list
+    # .extend(), on the other hand, opens the bag and puts each item from inside it directly onto the shelf — so .extend(["stapler", "tape"]) adds two new slots ("stapler" and "tape" separately), bringing the total to 4.
     len(order_lines)
+    return (order_lines,)
+
+
+@app.cell
+def _(order_lines):
+    order_lines[2]
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    append always adds exactly one item to the list, no matter what you hand it
+    """)
     return
 
 
@@ -400,6 +447,20 @@ def _():
     print(sorted(tickers))
     print(tickers.sort())
     tickers
+    return (tickers,)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    tickers.sort() sorts the list in place — it changes tickers directly and gives back nothing, so printing it shows None
+    """)
+    return
+
+
+@app.cell
+def _(tickers):
+    print(sorted(tickers, reverse=True))
     return
 
 
@@ -433,9 +494,38 @@ def _(mo):
 @app.cell
 def _():
     prices = [12.50, 8.00, 19.99]
-    sale_prices = prices
+    sale_prices = prices[:]
     sale_prices.append(4.99)
     prices
+
+    print(prices)
+    return prices, sale_prices
+
+
+@app.cell
+def _(prices, sale_prices):
+    prices is sale_prices
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    You'd want two names to share the same list when different parts of a program need to see the exact same, always-up-to-date data
+    """)
+    return
+
+
+@app.cell
+def _(sale_prices):
+    discounted = [price * 0.9 for price in sale_prices]
+    discounted
+
+    discounted = []
+    for price in sale_prices:
+        discounted.append(price * 0.9)
+    discounted
+    print(discounted)
     return
 
 
@@ -637,6 +727,43 @@ def _(mo):
     return
 
 
+@app.cell
+def _(orders):
+    total_freight = 0
+    for order in orders:
+        total_freight = total_freight + order["Freight"]
+    total_freight
+    return
+
+
+@app.cell
+def _(orders):
+    def _():
+        no_ship_count = 0
+        for order in orders:
+            if order["ShippedDate"] is None:
+                no_ship_count = no_ship_count + 1
+        return no_ship_count
+
+
+    _()
+    return
+
+
+@app.cell
+def _(orders):
+    def _():
+        biggest_order = orders[0]
+        for order in orders:
+            if order["Freight"] > biggest_order["Freight"]:
+                biggest_order = order
+        return biggest_order
+
+
+    _()
+    return
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
@@ -655,12 +782,16 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
+def _():
+    return
+
+
+@app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
     *One row is ...*
 
-    *(Replace this line with your own sentence. If this cell shows you code instead of
-    text, use the cell menu to turn it into a markdown cell.)*
+    One row is one customer's order, everything about a single shipment, from who placed it and where it's going, to when it was ordered and when it shipped.
     """)
     return
 
@@ -698,6 +829,24 @@ def _():
         {"Symbol": "TSLA", "Shares": 150, "Price": 255.70},
     ]
     portfolio
+    return (portfolio,)
+
+
+@app.cell
+def _(portfolio):
+    portfolio_total = 0
+    for holding in portfolio:
+        holding_cost = holding["Shares"] * holding["Price"]
+        portfolio_total = portfolio_total + holding_cost
+    portfolio_total
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    For each holding in the portfolio, multiply its number of shares by its price to get how much that one holding costs. Then add up all six of those costs together to get the total cost of the whole portfolio
+    """)
     return
 
 

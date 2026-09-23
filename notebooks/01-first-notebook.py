@@ -253,7 +253,7 @@ def _(freight_charges):
 
 @app.cell
 def _(freight_charges):
-    freight_charges[:3]
+    freight_charges[:3:]
     return
 
 
@@ -300,6 +300,20 @@ def _(mo):
     1. `"16.75" + "22.25"`
     2. `16.75 + "22.25"`
     """)
+    return
+
+
+app._unparsable_cell(
+    r"""
+    16.75" + "22.25"
+    """,
+    name="_"
+)
+
+
+@app.cell
+def _():
+    16.75 + "22.25"
     return
 
 
@@ -703,7 +717,6 @@ def _(freight_charges, orders):
     _ax.bar([str(_o) for _o in orders], freight_charges)
     _ax.set_ylabel("freight")
     _fig
-
     return
 
 
