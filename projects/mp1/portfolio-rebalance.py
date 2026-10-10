@@ -98,31 +98,32 @@ def _(mo):
 @app.cell
 def _():
     # --- Limits (my assumptions) ---
-    weekly_budget = 50.00      # dollars I can spend on raw meat per week
+    weekly_budget = 100.00      # dollars I can spend on raw meat per week
     weekly_hours = 77           # dehydrator hours: (2 + 9 hrs per day) x 7 days
 
     # --- Treats: one dictionary per treat ---
-    # raw_cost_per_lb : what I pay per lb of raw material
-    # dried_yield     : share of raw weight left after drying (0.29 = 29%)
-    # hours_per_batch : dehydrator hours for one batch
-    # raw_lb_per_batch: how much raw material one batch holds (assumption)
-    # bag_oz          : finished ounces in one bag/pack
-    # price           : selling price per bag
+    # max_bags = most bags I think I could sell per week (assumption)
     treats = [
         {"name": "Beef liver 4 oz",     "raw_cost_per_lb": 2.45, "dried_yield": 0.29,
-         "hours_per_batch": 10, "raw_lb_per_batch": 10, "bag_oz": 4.0, "price": 9.99},
+         "hours_per_batch": 10, "raw_lb_per_batch": 10, "bag_oz": 4.0,
+         "price": 9.99, "max_bags": 30},
         {"name": "Pig ear strips 6 oz", "raw_cost_per_lb": 3.69, "dried_yield": 0.38,
-         "hours_per_batch": 14, "raw_lb_per_batch": 10, "bag_oz": 6.0, "price": 9.99},
+         "hours_per_batch": 14, "raw_lb_per_batch": 10, "bag_oz": 6.0,
+         "price": 9.99, "max_bags": 20},
         {"name": "Salmon spine 3-pack", "raw_cost_per_lb": 1.50, "dried_yield": 0.25,
-         "hours_per_batch": 16, "raw_lb_per_batch": 10, "bag_oz": 2.2, "price": 8.99},
+         "hours_per_batch": 16, "raw_lb_per_batch": 10, "bag_oz": 2.2,
+         "price": 8.99, "max_bags": 20},
         {"name": "Fish tails 4 oz",     "raw_cost_per_lb": 1.50, "dried_yield": 0.33,
-         "hours_per_batch": 10, "raw_lb_per_batch": 10, "bag_oz": 4.0, "price": 14.99},
+         "hours_per_batch": 10, "raw_lb_per_batch": 10, "bag_oz": 4.0,
+         "price": 14.99, "max_bags": 15},
         {"name": "Skin-wrapped spine",  "raw_cost_per_lb": 1.70, "dried_yield": 0.30,
-         "hours_per_batch": 20, "raw_lb_per_batch": 10, "bag_oz": 3.0, "price": 11.99},
+         "hours_per_batch": 20, "raw_lb_per_batch": 10, "bag_oz": 3.0,
+         "price": 11.99, "max_bags": 20},
         {"name": "Fish skin",           "raw_cost_per_lb": 1.50, "dried_yield": 0.30,
-         "hours_per_batch": 6,  "raw_lb_per_batch": 10, "bag_oz": 3.0, "price": 9.99},
+         "hours_per_batch": 6,  "raw_lb_per_batch": 10, "bag_oz": 3.0,
+         "price": 9.99, "max_bags": 20},
     ]
-    return (treats,)
+    return treats, weekly_budget, weekly_hours
 
 
 @app.cell(hide_code=True)
@@ -146,12 +147,38 @@ def _(treats):
         _row["batch_profit"] = _row["bags_per_batch"] * _t["price"] - _row["batch_cost"]
         _row["profit_per_hour"] = _row["batch_profit"] / _t["hours_per_batch"]
         batch_info.append(_row)
-    return
+    return (batch_info,)
 
 
 @app.cell
-def _():
-    return
+def _(batch_info):
+    ranked = sorted(batch_info, key=lambda b: b["profit_per_hour"], reverse=True)
+    return (ranked,)
+
+
+@app.cell
+def _(ranked, weekly_budget, weekly_hours):
+    money_left = weekly_budget
+    hours_left = weekly_hours
+    plan = []
+
+    for _b in ranked:
+        _by_money = int(money_left // _b["batch_cost"])
+        _by_hours = int(hours_left // _b["hours_per_batch"])
+        _by_demand = int(_b["max_bags"] // _b["bags_per_batch"])
+        _batches = min(_by_money, _by_hours, _by_demand)
+        if _b["batch_profit"] <= 0:
+            _batches = 0
+        _cost = _batches * _b["batch_cost"]
+        _hours = _batches * _b["hours_per_batch"]
+        _bags = _batches * _b["bags_per_batch"]
+        _revenue = _bags * _b["price"]
+        plan.append({"name": _b["name"], "batches": _batches, "bags": _bags,
+                     "cost": _cost, "hours": _hours,
+                     "revenue": _revenue, "profit": _revenue - _cost})
+        money_left = money_left - _cost
+        hours_left = hours_left - _hours
+    return hours_left, money_left, plan
 
 
 @app.cell(hide_code=True)
@@ -165,7 +192,37 @@ def _(mo):
 
 
 @app.cell
-def _():
+def _(plan, weekly_budget, weekly_hours):
+    print(f"{'Treat':<22}{'Batches':>8}{'Bags':>7}{'Cost':>10}{'Hours':>7}{'Profit':>10}")
+    print("-" * 64)
+    for _p in plan:
+        print(f"{_p['name']:<22}{_p['batches']:>8}{_p['bags']:>7}"
+              f"{_p['cost']:>10.2f}{_p['hours']:>7}{_p['profit']:>10.2f}")
+    print("-" * 64)
+
+    total_batches = sum(_p["batches"] for _p in plan)
+    total_bags = sum(_p["bags"] for _p in plan)
+    total_cost = sum(_p["cost"] for _p in plan)
+    total_hours = sum(_p["hours"] for _p in plan)
+    total_revenue = sum(_p["revenue"] for _p in plan)
+    total_profit = sum(_p["profit"] for _p in plan)
+    print(f"{'TOTAL':<22}{total_batches:>8}{total_bags:>7}"
+          f"{total_cost:>10.2f}{total_hours:>7}{total_profit:>10.2f}")
+
+    _made = [_p for _p in plan if _p["batches"] > 0]
+    _best = max(_made, key=lambda p: p["profit"])
+    print()
+    print(f"With ${weekly_budget:.0f} and {weekly_hours} dehydrator hours a week, "
+          f"my best treat is {_best['name']}, and the plan earns "
+          f"${total_profit:.2f} profit per week.")#
+    return total_cost, total_hours, total_profit
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    change between demand and trends.
+    """)
     return
 
 
@@ -180,7 +237,47 @@ def _(mo):
 
 
 @app.cell
-def _():
+def _(
+    hours_left,
+    money_left,
+    plan,
+    total_cost,
+    total_hours,
+    total_profit,
+    treats,
+    weekly_budget,
+    weekly_hours,
+):
+    # Check 1: money spent + money left should equal the weekly budget
+    _sum1 = total_cost + money_left
+    print(f"Check 1: spent ${total_cost:.2f} + left ${money_left:.2f} = ${_sum1:.2f}  |  budget ${weekly_budget:.2f}")
+    assert abs(_sum1 - weekly_budget) < 0.01, "Check 1 FAILED: money does not add up"
+
+    # Check 2: hours used + hours left should equal the weekly hours
+    _sum2 = total_hours + hours_left
+    print(f"Check 2: used {total_hours} + left {hours_left} = {_sum2}  |  weekly hours {weekly_hours}")
+    assert _sum2 == weekly_hours, "Check 2 FAILED: hours do not add up"
+
+    # Check 3: rebuild total profit a second way, straight from the inputs
+    _batches_by_name = {_p["name"]: _p["batches"] for _p in plan}
+    _rev2 = 0
+    _cost2 = 0
+    for _t in treats:
+        _n = _batches_by_name[_t["name"]]
+        _bags2 = int(_t["raw_lb_per_batch"] * _t["dried_yield"] * 16 // _t["bag_oz"])
+        _rev2 = _rev2 + _n * _bags2 * _t["price"]
+        _cost2 = _cost2 + _n * _t["raw_lb_per_batch"] * _t["raw_cost_per_lb"]
+    _profit2 = _rev2 - _cost2
+    print(f"Check 3: loop profit ${total_profit:.2f}  |  rebuilt from inputs ${_profit2:.2f}")
+    assert abs(total_profit - _profit2) < 0.01, "Check 3 FAILED: profit does not match"
+
+    # Check 4: no treat is made beyond what I can sell, and nothing is overspent
+    for _t in treats:
+        assert _batches_by_name[_t["name"]] * int(_t["raw_lb_per_batch"] * _t["dried_yield"] * 16 // _t["bag_oz"]) <= _t["max_bags"], "Check 4 FAILED: over demand"
+    assert money_left >= 0 and hours_left >= 0, "Check 4 FAILED: overspent"
+    print("Check 4: no treat over its sales limit, no money or hours below zero")
+
+    print("All checks passed.")
     return
 
 
@@ -199,10 +296,73 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
+    The agent first gave me a plan that spent the whole budget on one treat (fish skin: 3 batches at $50) and ignored what I could actually sell. I didn’t accept it because a one-treat table didn’t answer my question about how to split limited money and dehydrator time across a variety of products. I added a max_bags input for each treat and changed the loop so each treat is limited by whichever runs out first: money, dehydrator hours, or sales demand. The plan then used five treats. I knew it was right because I compared the table to my own expectation, and the checks in section 6 agreed (money spent plus money left equals the budget, and profit matched when rebuilt from the inputs).
+    """)
+    return
+
+
+@app.cell
+def _():
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
     ## 8. Going Further
 
     *Take at least one step past the main task, in any direction, and use your agent as much as you like. It does not have to work. State what you tried, what you found, and where it is in this notebook.*
     """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    I built a planner that tells me which dehydrated pet treats to make each week, and how many batches, based on my budget, my dehydrator hours, and how many bags I can sell, and then it adds a shopping list and a schedule for when to load each batch.
+    """)
+    return
+
+
+@app.cell
+def _(plan, treats):
+    home_windows = [(7, 9), (13, 24)]   # hours of the day I am home and awake
+
+    def is_home(t):
+        h = t % 24
+        if h == 0:
+            h = 24
+        for a, b in home_windows:
+            if a <= h <= b:
+                return True
+        return False
+
+    day_names = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+
+    def clock(t):
+        return f"{day_names[int(t // 24) % 7]} {int(t % 24):02d}:00"
+
+    _hours_by_name = {_t["name"]: _t["hours_per_batch"] for _t in treats}
+
+    batch_list = []
+    for _p in plan:
+        for _i in range(_p["batches"]):
+            batch_list.append(_p["name"])
+
+    schedule = []
+    free_at = 7                      # first load: Monday 7am
+    for _name in batch_list:
+        _dur = _hours_by_name[_name]
+        _s = free_at
+        while not (is_home(_s) and is_home(_s + _dur)) and _s < 168:
+            _s = _s + 1
+        schedule.append((_name, _s, _s + _dur))
+        free_at = _s + _dur
+
+    print("Loading schedule (load and unload only while I am home)")
+    for _name, _s, _e in schedule:
+        print(f"{_name:<22} load {clock(_s)}  ->  done {clock(_e)}")
+    print(f"All batches finished by {clock(free_at)}, {free_at - 7} hours after the first load.")
     return
 
 
