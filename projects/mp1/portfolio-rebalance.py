@@ -97,8 +97,32 @@ def _(mo):
 
 @app.cell
 def _():
-    # Your inputs.
-    return
+    # --- Limits (my assumptions) ---
+    weekly_budget = 50.00      # dollars I can spend on raw meat per week
+    weekly_hours = 77           # dehydrator hours: (2 + 9 hrs per day) x 7 days
+
+    # --- Treats: one dictionary per treat ---
+    # raw_cost_per_lb : what I pay per lb of raw material
+    # dried_yield     : share of raw weight left after drying (0.29 = 29%)
+    # hours_per_batch : dehydrator hours for one batch
+    # raw_lb_per_batch: how much raw material one batch holds (assumption)
+    # bag_oz          : finished ounces in one bag/pack
+    # price           : selling price per bag
+    treats = [
+        {"name": "Beef liver 4 oz",     "raw_cost_per_lb": 2.45, "dried_yield": 0.29,
+         "hours_per_batch": 10, "raw_lb_per_batch": 10, "bag_oz": 4.0, "price": 9.99},
+        {"name": "Pig ear strips 6 oz", "raw_cost_per_lb": 3.69, "dried_yield": 0.38,
+         "hours_per_batch": 14, "raw_lb_per_batch": 10, "bag_oz": 6.0, "price": 9.99},
+        {"name": "Salmon spine 3-pack", "raw_cost_per_lb": 1.50, "dried_yield": 0.25,
+         "hours_per_batch": 16, "raw_lb_per_batch": 10, "bag_oz": 2.2, "price": 8.99},
+        {"name": "Fish tails 4 oz",     "raw_cost_per_lb": 1.50, "dried_yield": 0.33,
+         "hours_per_batch": 10, "raw_lb_per_batch": 10, "bag_oz": 4.0, "price": 14.99},
+        {"name": "Skin-wrapped spine",  "raw_cost_per_lb": 1.70, "dried_yield": 0.30,
+         "hours_per_batch": 20, "raw_lb_per_batch": 10, "bag_oz": 3.0, "price": 11.99},
+        {"name": "Fish skin",           "raw_cost_per_lb": 1.50, "dried_yield": 0.30,
+         "hours_per_batch": 6,  "raw_lb_per_batch": 10, "bag_oz": 3.0, "price": 9.99},
+    ]
+    return (treats,)
 
 
 @app.cell(hide_code=True)
@@ -108,6 +132,20 @@ def _(mo):
 
     Add as many cells as you need. Try each step yourself before you ask your agent, and commit as you go.
     """)
+    return
+
+
+@app.cell
+def _(treats):
+    batch_info = []
+    for _t in treats:
+        _row = dict(_t)
+        _row["batch_cost"] = _t["raw_lb_per_batch"] * _t["raw_cost_per_lb"]
+        _finished_oz = _t["raw_lb_per_batch"] * _t["dried_yield"] * 16
+        _row["bags_per_batch"] = int(_finished_oz // _t["bag_oz"])
+        _row["batch_profit"] = _row["bags_per_batch"] * _t["price"] - _row["batch_cost"]
+        _row["profit_per_hour"] = _row["batch_profit"] / _t["hours_per_batch"]
+        batch_info.append(_row)
     return
 
 
