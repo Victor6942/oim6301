@@ -130,7 +130,7 @@ def _(cost_so_far):
         #     print(stock)
         #     stock_cost = stock[1] * stock[2]
         #     cost_so_far = cost_so_far + stock_cost
-        
+    
         return round(cost_so_far, 2)
 
     return (compute_cost,)
@@ -499,6 +499,19 @@ def _(mo):
 
     **Going further.** Post something more useful than one town's bill: choose a question somebody would ask, answer it from live data, and post the answer, in 140 characters or fewer.
     """)
+    return
+
+
+@app.cell
+def _(requests):
+    board_reply = requests.post(
+        "https://oim.zhili.dev/message",
+        headers={"x-token": "Victor6942"},
+        json={"message": f"Cowboys gonna win the superbowl"},
+        timeout=10,
+    )
+    board_reply.status_code, board_reply.json()
+
     return
 
 

@@ -1,0 +1,133 @@
+# Breeds are the AKC 2025 top 20 plus a few more from the Hill's list.
+# Sources (adult weight in pounds):
+#   Hill's ideal weight range PDF: most breeds.
+#   Purina / PetObesityPrevention.org: German Shorthaired Pointer (45-70).
+#   Wikipedia: Cane Corso, Australian Shepherd, Pembroke Welsh Corgi,
+#              Miniature Schnauzer, Pomeranian, Bernese Mountain Dog.
+# Yorkshire Terrier "<= 8" and Chihuahua "<= 6" are stored as 0 to the limit.
+# Poodle (miniature) "11" is stored as 11 to 11.
+breeds = {
+    "French Bulldog": (18, 29),
+    "Labrador Retriever": (55, 80),
+    "Golden Retriever": (55, 75),
+    "German Shepherd": (70, 95),
+    "Dachshund (standard)": (16, 32),
+    "Poodle (standard)": (44, 70),
+    "Poodle (miniature)": (11, 11),
+    "Beagle": (26, 31),
+    "Rottweiler": (88, 110),
+    "German Shorthaired Pointer": (45, 70),
+    "Bulldog": (40, 55),
+    "Cane Corso": (90, 110),
+    "Cavalier King Charles Spaniel": (10, 18),
+    "Yorkshire Terrier": (0, 8),
+    "Australian Shepherd": (35, 70),
+    "Doberman Pinscher": (64, 88),
+    "Pembroke Welsh Corgi": (24, 31),
+    "Miniature Schnauzer": (9, 18),
+    "Boxer": (53, 70),
+    "Pomeranian": (3, 7),
+    "Bernese Mountain Dog": (75, 120),
+    "Siberian Husky": (35, 60),
+    "Border Collie": (30, 45),
+    "Dalmatian": (50, 59),
+    "Great Dane": (121, 176),
+    "West Highland White Terrier": (15, 22),
+    "Pug": (14, 18),
+    "Shih Tzu": (9, 18),
+    "English Cocker Spaniel": (26, 34),
+    "Chihuahua": (0, 6),
+}
+
+# ASSUMPTION: size classes by the middle of a breed's range, in pounds (sources vary)
+size_ranges = {
+    "small": (0, 25),
+    "medium": (25, 60),
+    "large": (60, 300),
+}
+
+
+def find_size(weight):
+    for name, (low, high) in size_ranges.items():
+        if low <= weight < high:
+            return name
+    return "outside the ranges"
+
+
+def classify_dog(weight, low, high):
+    """compare a dog's weight with its breed's ideal range"""
+    if weight > high:
+        percent = (weight - high) / high * 100
+        if percent >= 40:
+            return f"{percent:.0f}% above the range: Obese (about 9/9)"
+        elif percent >= 30:
+            return f"{percent:.0f}% above the range: Heavily overweight (about 8/9)"
+        elif percent >= 20:
+            return f"{percent:.0f}% above the range: Overweight (about 7/9)"
+        elif percent >= 10:
+            return f"{percent:.0f}% above the range: Slightly overweight (about 6/9)"
+        else:
+            return f"{percent:.0f}% above the range: just above ideal"
+    elif weight >= low:
+        return "Within the ideal range"
+    else:
+        percent = (low - weight) / low * 100
+        if percent >= 10:
+            return f"{percent:.0f}% below the range: Underweight"
+        return f"{percent:.0f}% below the range: just below ideal"
+
+
+def life_stage(age):
+    """ASSUMPTION: puppy under 1 year, senior at 7 or older (varies by breed and size)"""
+    if age < 1:
+        return "puppy"
+    elif age >= 7:
+        return "senior"
+    return "adult"
+
+
+def pounds_to_ideal(weight, low, high):
+    """pounds to lose (positive) or gain (negative) to reach the ideal range"""
+    if weight > high:
+        return weight - high
+    elif weight < low:
+        return weight - low
+    return 0
+
+
+def main():
+    names = list(breeds)
+    print("Choose a breed:")
+    for i, name in enumerate(names, start=1):
+        print(f"  {i:>2}. {name}")
+    choice = int(input("Enter the number: "))
+    breed = names[choice - 1]
+    low, high = breeds[breed]
+
+    age = float(input(f"Your {breed}'s age in years (for 6 months, type 0.5): "))
+    weight = float(input(f"Your {breed}'s current weight in pounds: "))
+    size = find_size((low + high) / 2)
+    stage = life_stage(age)
+
+    print(f"Breed: {breed}  |  size class: {size}  |  life stage: {stage}")
+
+    if stage == "puppy":
+        print(f"The ideal range of {low}-{high} lb is for fully grown adults, so it does not apply to a puppy.")
+        print("Ask your vet for a growth chart.")
+    else:
+        result = classify_dog(weight, low, high)
+        change = pounds_to_ideal(weight, low, high)
+        print(f"Result: {result}.")
+        print(f"Your {breed}'s ideal weight is {low}-{high} lb.")
+        if change > 0:
+            print(f"To reach the top of the range, your dog would need to lose about {change:.1f} lb.")
+        elif change < 0:
+            print(f"To reach the bottom of the range, your dog would need to gain about {-change:.1f} lb.")
+        else:
+            print("Your dog is already in the ideal range.")
+        if stage == "senior":
+            print("Senior dogs can lose muscle with age, so ask your vet to check body condition too.")
+    print("This is a rough guide. Ask your vet for your dog's exact target weight.")
+
+
+main()
