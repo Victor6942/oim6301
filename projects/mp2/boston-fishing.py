@@ -112,7 +112,7 @@ def _():
     ]
 
     days = 3                 # how many days ahead to look
-    max_wind_mph = 10        # skip a window if wind goes above this
+    max_wind_mph = 15        # skip a window if wind goes above this
     max_rain_chance = 30     # skip a window if rain chance goes above this (%)
     hours_before_high = 2    # start of the window, before high tide
     hours_after_high = 2     # end of the window, after high tide
