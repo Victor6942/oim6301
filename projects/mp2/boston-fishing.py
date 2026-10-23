@@ -114,8 +114,8 @@ def _():
     days = 3                 # how many days ahead to look
     max_wind_mph = 15        # skip a window if wind goes above this
     max_rain_chance = 30     # skip a window if rain chance goes above this (%)
-    hours_before_high = 2    # start of the window, before high tide
-    hours_after_high = 2     # end of the window, after high tide
+    hours_before_high = 2   # start of the window, before high tide
+    hours_after_high = 2    # end of the window, after high tide
     return (
         days,
         hours_after_high,
@@ -398,6 +398,16 @@ def _(mo):
 def _(mo):
     mo.md(r"""
     Prediction: I will change hours_before_high and hours_after_high from 2 to 0, so each window is only the hour of the high tide. I expect the number of good high tides to go up slightly from 36 to about 40, because a one-hour window checks fewer hours, so the highest wind in each window can only stay the same or get lower, and a few rows that were just over my 15 mph limit, like Salem's 15.4 and Gloucester's 15.6, may now pass. I expect the calmest spot to stay Chatham, because its lowest wind of 2.5 mph is already low and a narrower window can't make it much higher.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    What happened: After changing hours_before_high and hours_after_high from 2 to 0, 44 of 60 high tides passed my limits, compared with 36 before. The calmest spot was still Chatham at 2026-10-24 23:32, but its wind dropped from 2.5 mph to 1.1 mph. Eight windows flipped from skip to good, and none flipped the other way. Examples are Plymouth's 21:21 tide on October 22, which dropped from 22.5 mph to 7.6 mph, Sandwich's 21:03 tide, which dropped from 23.0 to 11.5, and Salem's 08:54 tide, which dropped from 15.4 to 12.8.
+
+    Did it match: Partly. I predicted the direction correctly, since the number of good tides went up, because a one-hour window can only lower the highest wind. I predicted the calmest spot would stay Chatham, and it did. But my guess of about 40 was too low, because the real number was 44, so I was off by 4. I underestimated how much the wind changes across the hours around a tide: several evening tides had calm wind at the hour of the tide but strong wind an hour or two later, so the wider window had counted that stronger wind. I also expected the calmest wind to stay about the same, and it dropped to 1.1 mph.
     """)
     return
 
