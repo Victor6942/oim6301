@@ -112,7 +112,7 @@ def _():
     ]
 
     days = 3                 # how many days ahead to look
-    max_wind_mph = 15        # skip a window if wind goes above this
+    max_wind_mph = 10        # skip a window if wind goes above this
     max_rain_chance = 30     # skip a window if rain chance goes above this (%)
     hours_before_high = 2    # start of the window, before high tide
     hours_after_high = 2     # end of the window, after high tide
@@ -390,6 +390,14 @@ def _(mo):
     - Goes in: latitude, longitude and a number of days.
     - Comes out: a list of hours, each with a time, a rain chance and a wind speed in mph.
     - One line I had to ask about: `zip(...)`. Open-Meteo sends three separate lists, and zip lines them up so each hour gets one record.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    Prediction: I will change hours_before_high and hours_after_high from 2 to 0, so each window is only the hour of the high tide. I expect the number of good high tides to go up slightly from 36 to about 40, because a one-hour window checks fewer hours, so the highest wind in each window can only stay the same or get lower, and a few rows that were just over my 15 mph limit, like Salem's 15.4 and Gloucester's 15.6, may now pass. I expect the calmest spot to stay Chatham, because its lowest wind of 2.5 mph is already low and a narrower window can't make it much higher.
     """)
     return
 
