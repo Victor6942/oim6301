@@ -13,7 +13,7 @@
 
 import marimo
 
-__generated_with = "0.25.1"
+__generated_with = "0.24.2"
 app = marimo.App(width="medium", sql_output="polars")
 
 
@@ -100,7 +100,7 @@ def _(mo, pl, requests):
         town_rows = pl.DataFrame(_records).select(town_columns)
 
     county_rows.shape, town_rows.shape
-    return county_rows, town_rows
+    return (town_rows,)
 
 
 @app.cell(hide_code=True)
@@ -130,7 +130,7 @@ def _(mo):
 
 
 @app.cell
-def _(county_rows, duckdb, mo, town_rows):
+def _(duckdb, mo):
     _file = mo.notebook_dir().parent / "data" / "ma-towns.duckdb"
     _file.parent.mkdir(exist_ok=True)
     _file.unlink(missing_ok=True)
@@ -218,6 +218,84 @@ def _(mo):
     return
 
 
+@app.cell
+def _(database, duckdb):
+    with duckdb.connect(database) as _con:
+        _con.execute("""
+            CREATE OR REPLACE TABLE town_bills (
+                town                                VARCHAR NOT NULL REFERENCES towns(name),
+                year                                INTEGER NOT NULL,
+                average_single_family_bill_dollars  INTEGER NOT NULL,
+                PRIMARY KEY (town, year)
+            )
+        """)
+        _con.execute("""
+            INSERT INTO town_bills VALUES
+                ('Wellesley', 2008, 9405),
+                ('Wellesley', 2020, 15760)
+        """)
+    return
+
+
+@app.cell
+def _(ask):
+    ask("SELECT * FROM town_bills")
+    return
+
+
+@app.cell
+def _():
+    return
+
+
+@app.cell
+def _(town_rows):
+    def _():
+        import altair as alt
+
+        _chart = (
+            alt.Chart(town_rows) # top 10 towns by population
+            .mark_bar()
+            .transform_window(
+                rank="rank()",
+                sort=[alt.SortField("population", order="descending")],
+            )
+            .transform_filter(alt.datum.rank <= 10)
+            .encode(
+                y=alt.Y(
+                    "name:N",
+                    sort="-x",
+                    axis=alt.Axis(title=None),
+                ),
+                x=alt.X("population:Q", title="Population"),
+                tooltip=[
+                    alt.Tooltip("name:N", title="Town"),
+                    alt.Tooltip("population:Q", format=",.0f", title="Population"),
+                ],
+            )
+            .properties(title="Top 10 towns by population", width="container")
+            .configure_view(stroke=None)
+            .configure_axis(grid=False)
+        )
+        return _chart
+
+
+    _()
+    return
+
+
+@app.cell
+def _():
+    import altair as alt
+
+    return
+
+
+@app.cell
+def _():
+    return
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
@@ -254,6 +332,48 @@ def _(mo):
     return
 
 
+@app.cell
+def _(database, duckdb):
+    try:
+        with duckdb.connect(database) as _con:
+            _con.execute(
+                "INSERT INTO towns VALUES ('Wellesley', 'Norfolk', 100, 50000, 10000)"
+            )
+        duplicate_result = "accepted"
+    except duckdb.ConstraintException as _error:
+        duplicate_result = str(_error).splitlines()[0]
+    duplicate_result
+    return
+
+
+@app.cell
+def _(database, duckdb):
+    try:
+        with duckdb.connect(database) as _con:
+            _con.execute(
+                "INSERT INTO towns VALUES ('TestTown', 'Norfolk', 0, 50000, 10000)"
+            )
+        zero_population_result = "accepted"
+    except duckdb.ConstraintException as _error:
+        zero_population_result = str(_error).splitlines()[0]
+    zero_population_result
+    return
+
+
+@app.cell
+def _(database, duckdb):
+    try:
+        with duckdb.connect(database) as _con:
+            _con.execute(
+                "INSERT INTO towns VALUES ('AnotherTestTown', 'Fakecounty', 100, 50000, 10000)"
+            )
+        bad_county_result = "accepted"
+    except duckdb.ConstraintException as _error:
+        bad_county_result = str(_error).splitlines()[0]
+    bad_county_result
+    return
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
@@ -286,6 +406,18 @@ def _(mo):
     *Check yourself: Brookline, Newton, Cambridge, Somerville, Quincy.*
 
     **Going further.** Ask the same question of `counties` and `towns` together: which county is each of those five in, and what share of its county's people does each hold? That needs both tables at once, which the topic slides call a join.
+    """)
+    return
+
+
+@app.cell
+def _(ask):
+    ask("""
+        SELECT name, population, average_single_family_bill_dollars
+        FROM towns
+        WHERE population > 50000
+        ORDER BY average_single_family_bill_dollars DESC
+        LIMIT 5
     """)
     return
 
@@ -343,6 +475,40 @@ def _(mo):
     3. For each county, the total population of its towns, and the share of those people living in towns with a bill over $10,000. Use `sum()` and a `CASE WHEN` inside it, or two queries. *Check yourself: the totals add up to 7,136,171.*
 
     **Going further.** Answer one question of your own about the towns with `GROUP BY`, and check it in polars on `town_rows`. Or download the TV show database from [Downloads](https://oim6301.github.io/downloads/), keep it out of your repository, and answer the two TV show questions from the topic slides.
+    """)
+    return
+
+
+@app.cell
+def _(ask):
+    ask("""
+        SELECT towns.county, count(*) AS counted_towns, counties.towns AS official_towns
+        FROM towns
+        JOIN counties ON towns.county = counties.name
+        GROUP BY towns.county, counties.towns
+        ORDER BY counted_towns DESC
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ask("SELECT count(*) AS total_towns FROM towns")
+    """)
+    return
+
+
+@app.cell
+def _(ask):
+    ask("""
+        SELECT county,
+               sum(population) AS total_population,
+               sum(CASE WHEN average_single_family_bill_dollars > 10000 THEN population ELSE 0 END) AS high_bill_population,
+               sum(CASE WHEN average_single_family_bill_dollars > 10000 THEN population ELSE 0 END) * 100.0 / sum(population) AS high_bill_share_percent
+        FROM towns
+        GROUP BY county
+        ORDER BY total_population DESC
     """)
     return
 
@@ -405,6 +571,23 @@ def _(mo):
     2. For each country, the number of orders and the total of `Freight`, the most freight first. *Check yourself: USA with 2,328 orders and 573,251 in freight, then Germany with 2,193 and 537,189.75, then France with 1,778 and 442,055.75.*
 
     **Going further.** Rank the countries by freight per order instead, and see which countries move.
+    """)
+    return
+
+
+@app.cell
+def _(ask, orders_file):
+    ask(f"SELECT count(DISTINCT ShipCountry) AS countries FROM '{orders_file}'")
+    return
+
+
+@app.cell
+def _(ask, orders_file):
+    ask(f"""
+        SELECT ShipCountry, count(*) AS orders, sum(Freight) AS total_freight
+        FROM '{orders_file}'
+        GROUP BY ShipCountry
+        ORDER BY total_freight DESC
     """)
     return
 
