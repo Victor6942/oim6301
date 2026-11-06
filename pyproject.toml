@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
+    "duckdb>=1.5.5",
     "fakers>=0.5.0",
     "folium>=0.20.0",
     "marimo[recommended]>=0.24.2",
