@@ -1,0 +1,21 @@
+fly_id,pattern_name,size,fly_type,cost
+1,Adams,14,dry,1.75
+2,Parachute Adams,16,dry,1.85
+3,Elk Hair Caddis,16,dry,1.9
+4,Royal Wulff,14,dry,2.1
+5,Stimulator,10,dry,2.4
+6,Blue-Winged Olive,18,dry,1.8
+7,Griffith's Gnat,20,dry,1.6
+8,Hopper,10,dry,2.5
+9,Pheasant Tail,18,nymph,1.7
+10,Hare's Ear,16,nymph,1.7
+11,Prince Nymph,14,nymph,1.95
+12,Copper John,16,nymph,2.2
+13,San Juan Worm,12,nymph,1.4
+14,Pat's Rubber Legs,8,nymph,2.3
+15,Egg Pattern,14,nymph,1.3
+16,Woolly Bugger,8,streamer,2.25
+17,Zonker,6,streamer,2.6
+18,Clouser Minnow,4,streamer,2.8
+19,Mickey Finn,8,streamer,2.2
+20,Sculpin,6,streamer,2.9
