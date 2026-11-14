@@ -1,6 +1,4 @@
-
-
- # 1. The Scenario
+# 1. The Scenario
 
 VicFly is a small fly-fishing guide service that runs trips in New England and the Pacific Northwest. It runs guided trips on rivers in several states and keeps its records in a notebook and a phone contacts list. The owner wants to know which states and flies earn and catch the most, which clients come back, and whether any trip is overbooked.
 
@@ -31,8 +29,8 @@ VicFly is a small fly-fishing guide service that runs trips in New England and t
 7. For each fly, the quantity used against the fish caught on it.
 8. (checks a rule) The trips where booked party sizes add up to more than the maximum number of anglers.
 
+# 2. The ERD
 
-   # 2. The ERD
 ```mermaid
 erDiagram
   GUIDES ||--o{ TRIPS : leads
@@ -102,7 +100,6 @@ erDiagram
   }
 ```
 
-   # 3. What One Row Means
 # 3. What One Row Means
 
 - **clients:** One row of clients is one person who has signed up to fish with VicFly.
@@ -114,7 +111,8 @@ erDiagram
 - **trip_flies:** One row of trip_flies is how many of one kind of fly were used on one trip.
 - **catches:** One row of catches is one fish caught on a trip, with its species and, if known, the fly it took.
 
-   # 4. Design Choices
+# 4. Design Choices
+
 1. **Keys.** The business already identifies clients by email and guides by license number. I chose an invented number as the primary key for both (`client_id` and `guide_id`), and I kept the email and license number as UNIQUE columns. I did this because emails can change, and a primary key should not change, since other tables point to it.
 
 2. **Optional relationships.** The fly on a catch is optional, because the scenario says the fly a fish took is sometimes not recorded, so `catches.fly_id` can be empty. A client can exist without any booking, and a trip can exist without any catches, so those links are optional on the "many" side too.
