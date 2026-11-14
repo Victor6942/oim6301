@@ -54,5 +54,24 @@ def _(ask):
     return
 
 
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    # Reading it back
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    Prediction: I picked "Which state brings in the most revenue?" The joins go from
+    bookings to trips to rivers. Before any grouping I expect 492 rows, because bookings
+    has one row per client per trip, and each booking belongs to exactly one trip, and each
+    trip belongs to exactly one river. So the joins should not add or drop any rows.
+    """)
+    return
+
+
 if __name__ == "__main__":
     app.run()
