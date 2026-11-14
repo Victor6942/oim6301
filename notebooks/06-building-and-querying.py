@@ -444,6 +444,19 @@ def _(ask):
     return
 
 
+@app.cell
+def _(ask):
+    ask("""
+        SELECT county, sum(population), sum(population) AS total_pop, avg(population) AS avg_pop, round(avg(population),2) 
+        AS avg_pop, round(avg(average_single_family_bill_dollars), 2) AS avg_bill, max(population) AS max_pop
+        FROM towns
+        GROUP BY county
+ 
+    """
+       )
+    return
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
