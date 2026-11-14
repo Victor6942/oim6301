@@ -54,6 +54,17 @@ def _(ask):
     return
 
 
+@app.cell
+def _(ask):
+    ask("""
+        SELECT count(*) AS joined_rows
+        FROM bookings
+        JOIN trips  ON trips.trip_id = bookings.trip_id
+        JOIN rivers ON rivers.river_id = trips.river_id
+    """)
+    return
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
@@ -69,6 +80,19 @@ def _(mo):
     bookings to trips to rivers. Before any grouping I expect 492 rows, because bookings
     has one row per client per trip, and each booking belongs to exactly one trip, and each
     trip belongs to exactly one river. So the joins should not add or drop any rows.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    What happened: The three joined tables gave 492 rows, the same as my prediction and
+    the same as the number of rows in bookings. Each booking belongs to one trip and each
+    trip to one river, so no join added or dropped rows.
+
+    What one row means: One row of the joined result is one client's booking on one trip,
+    together with the river and state where that trip was fished.
     """)
     return
 
