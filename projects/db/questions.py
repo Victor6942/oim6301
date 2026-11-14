@@ -68,6 +68,73 @@ def _(ask):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
+    ## 1. Which state brings in the most revenue?
+    """)
+    return
+
+
+@app.cell
+def _(ask):
+    ask("""
+        SELECT party_size, count(*) AS bookings,
+               min(price_charged) AS lowest, max(price_charged) AS highest
+        FROM bookings
+        GROUP BY party_size
+        ORDER BY party_size
+    """)
+    return
+
+
+@app.cell
+def _(ask):
+    ask("SELECT status, count(*) AS trips FROM trips GROUP BY status")
+    return
+
+
+@app.cell
+def _(ask):
+    revenue_by_state = ask("""
+        SELECT rivers.state, sum(bookings.price_charged) AS revenue
+        FROM bookings
+        JOIN trips  ON trips.trip_id = bookings.trip_id
+        JOIN rivers ON rivers.river_id = trips.river_id
+        WHERE trips.status = 'completed'
+        GROUP BY rivers.state
+        ORDER BY revenue DESC
+    """)
+
+    revenue_by_state
+    return (revenue_by_state,)
+
+
+@app.cell
+def _(ask, revenue_by_state):
+    sum_of_states = float(revenue_by_state["revenue"].sum())
+    total_directly = float(ask("""
+        SELECT sum(bookings.price_charged) AS total
+        FROM bookings
+        JOIN trips ON trips.trip_id = bookings.trip_id
+        WHERE trips.status = 'completed'
+    """)["total"][0])
+
+    print(sum_of_states, total_directly)
+    assert round(sum_of_states, 2) == round(total_directly, 2), "state totals do not add up"
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    Counting completed trips only and treating price_charged as the booking's total,
+    Massachusetts brings in the most revenue at $54,880, followed by Washington at $40,500
+    and Oregon at $26,220. Across all six states, completed trips brought in $169,220.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
     # Reading it back
     """)
     return
